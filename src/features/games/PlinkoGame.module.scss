@@ -1,0 +1,26 @@
+.wrapper {
+  text-align: center;
+}
+
+.canvas {
+  margin: 0 auto;
+  width: 300px;
+  height: 460px;
+  background: #121212;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+input {
+  width: 100px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}

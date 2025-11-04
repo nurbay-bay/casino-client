@@ -1,0 +1,49 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #121212;
+  color: #fff;
+  padding: 16px 24px;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.balance {
+  font-weight: 500;
+}
+
+button {
+  background: #fff;
+  color: #121212;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background: #ddd;
+}
+
+.link {
+  color: #fff;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
