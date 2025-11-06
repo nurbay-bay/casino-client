@@ -15,12 +15,12 @@ export default function HistoryPage() {
 
   return (
     <div className={s.wrapper}>
-      <h2>📜 История</h2>
+      <h2>История</h2>
 
       {loading && <p>Загрузка...</p>}
 
       <div className={s.section}>
-        <h3>🎮 Игры</h3>
+        <h3>Игры</h3>
         <table className={s.table}>
           <thead>
             <tr>
