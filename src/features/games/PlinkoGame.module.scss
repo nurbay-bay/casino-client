@@ -1,26 +1,83 @@
+// PlinkoGame.module.scss
 .wrapper {
   text-align: center;
+  padding: 20px;
 }
 
 .canvas {
-  margin: 0 auto;
-  width: 300px;
-  height: 460px;
-  background: #121212;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+  margin: 20px auto;
+  border: 2px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .controls {
   display: flex;
+  gap: 12px;
   justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
+  align-items: center;
+  margin: 20px 0;
+  
+  input {
+    padding: 10px 12px;
+    border: 1px solid #444;
+    border-radius: 6px;
+    width: 120px;
+    background: #222;
+    color: white;
+    font-size: 16px;
+    
+    &:focus {
+      outline: none;
+      border-color: #00ff88;
+    }
+  }
+  
+  button {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #00ff88, #00cc66);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s;
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #00ff99, #00dd77);
+      transform: translateY(-1px);
+    }
+    
+    &:disabled {
+      background: #666;
+      color: #999;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
 }
 
-input {
-  width: 100px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.info {
+  margin-top: 15px;
+  color: #888;
+  font-size: 14px;
+  
+  p {
+    margin: 5px 0;
+  }
 }
+
+// Адаптивность
+@media (max-width: 400px) {
+  .controls {
+    flex-direction: column;
+    
+    input {
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+}
+

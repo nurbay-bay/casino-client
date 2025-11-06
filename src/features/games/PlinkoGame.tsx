@@ -17,11 +17,12 @@ export default function PlinkoGame() {
 
   useEffect(() => {
     const engine = Engine.create();
-    engine.gravity.y = 1.1;
+    engine.gravity.y = 0.5;
+    engine.gravity.x = 0;
     engineRef.current = engine;
 
-    const width = 300;
-    const height = 460;
+    const width = 400;
+    const height = 500;
 
     const render = Render.create({
       element: sceneRef.current!,
@@ -34,44 +35,92 @@ export default function PlinkoGame() {
       },
     });
 
-    // === Стенки и дно ===
+    // === Стенки ===
     const walls = [
-      Bodies.rectangle(width / 2, height, width, 20, { isStatic: true }), // дно
-      Bodies.rectangle(0, height / 2, 10, height, { isStatic: true }), // левая
-      Bodies.rectangle(width, height / 2, 10, height, { isStatic: true }), // правая
+      Bodies.rectangle(width / 2, height, width, 20, { 
+        isStatic: true,
+        render: { fillStyle: "#333" },
+        label: "bottom"
+      }), // дно
+      Bodies.rectangle(0, height / 2, 10, height, { 
+        isStatic: true,
+        render: { fillStyle: "#333" }
+      }), // левая
+      Bodies.rectangle(width, height / 2, 10, height, { 
+        isStatic: true,
+        render: { fillStyle: "#333" }
+      }), // правая
     ];
     World.add(engine.world, walls);
 
-    // === Пины (препятствия) ===
+    // === Пирамида пинов ===
     const pins = [];
-    const rows = 8;
-    for (let row = 0; row < rows; row++) {
-      const y = 60 + row * 40;
-      const cols = row + 5;
-      for (let col = 0; col < cols; col++) {
-        const offsetX = row % 2 === 0 ? 25 : 45;
-        const x = offsetX + col * 40;
-        if (x > 10 && x < width - 10) {
-          pins.push(
-            Bodies.circle(x, y, 4, {
-              isStatic: true,
-              render: { fillStyle: "#aaa" },
-            })
-          );
-        }
+    const rows = 10;
+    const pinRadius = 4;
+    const verticalSpacing = 35;
+    const horizontalSpacing = 43;
+
+    for (let row = 1; row < rows; row++) {
+      const pinsInRow = row + 1;
+      const startY = 80 + row * verticalSpacing;
+      
+      const totalWidth = (pinsInRow - 1) * horizontalSpacing;
+      const startX = (width - totalWidth) / 2;
+
+      for (let col = 0; col < pinsInRow; col++) {
+        const x = startX + col * horizontalSpacing;
+        pins.push(
+          Bodies.circle(x, startY, pinRadius, {
+            isStatic: true,
+            render: { 
+              fillStyle: "#666",
+              strokeStyle: "#888",
+              lineWidth: 1
+            },
+            friction: 0.1,
+            restitution: 0.6
+          })
+        );
       }
     }
     World.add(engine.world, pins);
 
-    // === Вертикальные перегородки (ячейки внизу) ===
-    const bins = 8;
+    // === Только боковые перегородки для ячеек (оставляем проходы) ===
+    const bins = 8; // 8 ячеек
+    const binWidth = width / bins;
+    
+    // Создаем только боковые стенки ячеек, без верхних перекрытий
     for (let i = 0; i <= bins; i++) {
-      const wall = Bodies.rectangle((width / bins) * i, height - 40, 4, 80, {
+      const wall = Bodies.rectangle(binWidth * i, height - 10, 2, 20, {
         isStatic: true,
-        render: { fillStyle: "#333" },
+        render: { fillStyle: "#444" },
+        friction: 0,
+        restitution: 0.1,
+        label: `bin_wall_${i}`
       });
       World.add(engine.world, wall);
     }
+
+    // === Зоны для определения, в какую ячейку упал шар ===
+    const binZones = [];
+    for (let i = 0; i < bins; i++) {
+      const zone = Bodies.rectangle(
+        binWidth * i + binWidth / 2, 
+        height - 5, 
+        binWidth - 4, 
+        10, 
+        {
+          isStatic: true,
+          isSensor: true, // Важно: сенсор не имеет физического тела
+          render: { 
+            fillStyle: i % 2 === 0 ? "rgba(255,0,0,0.2)" : "rgba(0,255,0,0.2)" 
+          },
+          label: `bin_${i}`
+        }
+      );
+      binZones.push(zone);
+    }
+    World.add(engine.world, binZones);
 
     const runner = Runner.create();
     runnerRef.current = runner;
@@ -95,28 +144,36 @@ export default function PlinkoGame() {
     const engine = engineRef.current!;
     const width = 300;
 
-    // 🎯 Меньший шар с рандомом
-    const startX = width / 2 + (Math.random() * 80 - 40);
-    const ball = Bodies.circle(startX, 10, 4.5, {
-      restitution: 0.7, // прыгучесть
+    // Создаем шар
+    const startX = width / 2 + (Math.random() * 10 + 45);
+    const ball = Bodies.circle(startX, 90, 5, {
+      restitution: 0.4,
       friction: 0.005,
-      density: 0.001,
-      render: { fillStyle: "#00ff88" },
+      frictionAir: 0.03,
+      density: 0.008,
+      render: { 
+        fillStyle: "#00ff88",
+        strokeStyle: "#00cc66",
+        lineWidth: 1
+      },
+      label: "ball"
     });
 
     World.add(engine.world, ball);
 
-    // Маленький толчок для разнообразия
-    const impulseX = (Math.random() - 0.5) * 0.02;
-    Body.applyForce(ball, ball.position, { x: impulseX, y: 0 });
+    // Случайный толчок
+    const impulseX = (Math.random() - 0.5) * 0.008;
+    Body.applyForce(ball, ball.position, { x: 0, y: 0 });
 
     // Ждем, пока шар упадет вниз
     await new Promise<void>((resolve) => {
       const check = () => {
-        if (ball.position.y > 440) {
+        if (ball.position.y > 480) { // Когда шар достиг дна
           World.remove(engine.world, ball);
           resolve();
-        } else requestAnimationFrame(check);
+        } else {
+          requestAnimationFrame(check);
+        }
       };
       check();
     });
@@ -143,6 +200,12 @@ export default function PlinkoGame() {
       </div>
 
       {lastResult && lastResult.game === "plinko" && <GameResult data={lastResult} />}
+
+      {/* Подсказка о ячейках */}
+      <div className={s.info}>
+        <p>Шар падает через пины в одну из {8} ячеек внизу</p>
+        <p>Разные ячейки = разные множители!</p>
+      </div>
     </div>
   );
 }
