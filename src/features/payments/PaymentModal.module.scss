@@ -5,23 +5,200 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 }
 
 .box {
   background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  width: 340px;
-  text-align: center;
+  padding: 32px;
+  border-radius: 16px;
+  width: 480px;
+  max-width: 90vw;
   position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+  h2 {
+    margin-bottom: 24px;
+    color: #333;
+    text-align: center;
+  }
+}
+
+.amountInput {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #0070f3;
+    }
+  }
+}
+
+.paymentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cardSection {
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.cardElement {
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: #0070f3;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+
+  button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+}
+
+.cancelBtn {
+  background: #f5f5f5;
+  color: #666;
+
+  &:hover {
+    background: #e5e5e5;
+  }
+}
+
+.submitBtn {
+  background: #0070f3;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #0051a8;
+  }
+
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+}
+
+.error {
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  text-align: center;
+}
+
+.testCards {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+
+  h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    color: #666;
+
+    li {
+      margin: 4px 0;
+    }
+  }
 }
 
 .close {
   position: absolute;
-  top: 8px;
-  right: 10px;
+  top: 16px;
+  right: 20px;
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #333;
+  }
+}
+
+.note {
+  color: green;
+}
+
+// Добавляем к существующим стилям:
+
+.paymentStatus {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+
+  p {
+    margin: 0 0 10px 0;
+    color: #856404;
+    font-weight: 500;
+  }
+}
+
+.cancelBtn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background: #5a6268;
+  }
 }
