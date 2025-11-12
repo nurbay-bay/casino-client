@@ -5,12 +5,14 @@ import { fetchProfile, logout } from "../store/slices/authSlice";
 import AuthModal from "../features/auth/AuthModal";
 import { Link } from "react-router-dom";
 import s from "./Header.module.scss";
+import ProfileModal from "../features/profile/ProfileModal";
 
 export default function Header() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((s) => s.auth);
   const [authOpen, setAuthOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -30,18 +32,17 @@ export default function Header() {
       </Link>
 
       {user ? (
-        <div className={s.info}>
-          <Link to="/history" className={s.link}>
-            История
-          </Link>
-          <span className={s.balance}>Баланс: {user.balance} ₸</span>
+        <>
+          <Link to="/history">История</Link>
+          <span>Баланс: {user.balance} ₸</span>
           <button onClick={() => setPayOpen(true)}>Пополнить</button>
+          <button onClick={() => setProfileOpen(true)}>Профиль</button>
           <button onClick={handleLogout}>Выйти</button>
-        </div>
+        </>
       ) : (
         <button onClick={() => setAuthOpen(true)}>Войти</button>
       )}
-
+      {profileOpen && <ProfileModal onClose={() => setProfileOpen(false)} />}
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
       {payOpen && <PaymentModal onClose={() => setPayOpen(false)} />}
     </header>
