@@ -39,6 +39,30 @@ export const fetchProfile = createAsyncThunk("auth/profile", async () => {
   return res.data.user;
 });
 
+export const changePassword = createAsyncThunk(
+  "auth/changePassword",
+  async (data: { oldPassword: string; newPassword: string }) => {
+    await api.post("/auth/change-password", data);
+    return true;
+  }
+);
+
+export const requestPhoneChange = createAsyncThunk(
+  "auth/requestPhoneChange",
+  async (newPhone: string) => {
+    const res = await api.post("/auth/change-phone", { newPhone });
+    return res.data;
+  }
+);
+
+export const verifyPhoneChange = createAsyncThunk(
+  "auth/verifyPhoneChange",
+  async (code: string) => {
+    const res = await api.post("/auth/verify-phone-change", { code });
+    return res.data;
+  }
+);
+
 // === SLICE ===
 const authSlice = createSlice({
   name: "auth",
@@ -70,6 +94,17 @@ const authSlice = createSlice({
       })
       .addCase(fetchProfile.fulfilled, (s, a) => {
         s.user = a.payload;
+      })
+
+      .addCase(changePassword.fulfilled, (s) => {
+        s.error = null;
+      })
+      .addCase(requestPhoneChange.fulfilled, (s) => {
+        s.error = null;
+      })
+      .addCase(verifyPhoneChange.fulfilled, (s, a) => {
+        if (s.user) s.user.phone = a.payload.phone; // если бэк возвращает
+        s.error = null;
       });
   },
 });

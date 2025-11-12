@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import Matter, { Engine, Render, World, Bodies, Body, Runner } from "matter-js";
+import { Engine, Render, World, Bodies, Body, Runner } from "matter-js";
 import { useAppDispatch, useAppSelector } from "../../shared/hooks/reduxHooks";
 import { playGame } from "../../store/slices/gameSlice";
 
@@ -162,7 +162,7 @@ export default function PlinkoGame() {
     World.add(engine.world, ball);
 
     // Случайный толчок
-    const impulseX = (Math.random() - 0.5) * 0.008;
+    // const impulseX = (Math.random() - 0.5) * 0.008;
     Body.applyForce(ball, ball.position, { x: 0, y: 0 });
 
     // Ждем, пока шар упадет вниз
