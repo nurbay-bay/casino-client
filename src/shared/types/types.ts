@@ -12,6 +12,7 @@ export interface AuthResponse {
 
 export interface RegisterData {
   username: string;
+  birthDate: string;
   phone: string;
   password: string;
 }

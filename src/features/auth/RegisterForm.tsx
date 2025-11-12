@@ -12,6 +12,7 @@ interface Props {
 export default function RegisterForm({ onNext, onSwitch }: Props) {
   const dispatch = useAppDispatch();
   const [username, setUsername] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -19,7 +20,7 @@ export default function RegisterForm({ onNext, onSwitch }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await dispatch(register({ username, phone, password })).unwrap();
+      const res = await dispatch(register({ username, phone, birthDate, password })).unwrap();
       setMessage(res.message);
       onNext(phone);
     } catch (err: any) {
@@ -42,6 +43,13 @@ export default function RegisterForm({ onNext, onSwitch }: Props) {
         placeholder="Телефон"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
+        required
+      />
+      <input
+        type="date"
+        placeholder="Дата рождения"
+        value={birthDate}
+        onChange={(e) => setBirthDate(e.target.value)}
         required
       />
       <input
