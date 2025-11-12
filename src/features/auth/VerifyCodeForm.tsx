@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAppDispatch } from "../../shared/hooks/reduxHooks";
 import { verify } from "../../store/slices/authSlice";
 import s from "./AuthModal.module.scss";
+import { getErrorMessage } from "../../shared/utils/errorHandler";
 
 interface Props {
   phone: string;
@@ -15,12 +16,13 @@ export default function VerifyCodeForm({ phone, onDone }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await dispatch(verify({ phone, code })).unwrap();
+    const result = await dispatch(verify({ phone, code }));
+
+    if (verify.fulfilled.match(result)) {
       setMessage("Аккаунт подтверждён!");
       setTimeout(onDone, 1000);
-    } catch (err: any) {
-      setMessage("Неверный код");
+    } else {
+      setMessage(getErrorMessage(result.error));
     }
   };
 

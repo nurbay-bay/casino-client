@@ -15,11 +15,13 @@ export default function LoginForm({ onSwitch }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await dispatch(login({ username, password })).unwrap();
-      window.location.reload(); // обновляем UI
-    } catch (err: any) {
-      setError("Неверные данные");
+    const result = await dispatch(login({ username, password }));
+
+    if (login.fulfilled.match(result)) {
+      window.location.reload();
+    } else {
+      const err = result.error as any;
+      setError(err?.data?.message || "Неверные данные");
     }
   };
 

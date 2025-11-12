@@ -3,6 +3,7 @@ import { useAppDispatch } from "../../shared/hooks/reduxHooks";
 import { register } from "../../store/slices/authSlice";
 
 import s from "./AuthModal.module.scss";
+import { getErrorMessage } from "../../shared/utils/errorHandler";
 
 interface Props {
   onNext: (phone: string) => void;
@@ -19,12 +20,16 @@ export default function RegisterForm({ onNext, onSwitch }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const res = await dispatch(register({ username, phone, birthDate, password })).unwrap();
-      setMessage(res.message);
+    setMessage("");
+
+    const result = await dispatch(register({ username, phone, birthDate, password }));
+
+    if (register.fulfilled.match(result)) {
+      setMessage(result.payload.message);
       onNext(phone);
-    } catch (err: any) {
-      setMessage(err.message || "Ошибка регистрации");
+    } else {
+      console.log("REGISTER ERROR →", result.error.response)
+      setMessage(getErrorMessage(result.error));
     }
   };
 
