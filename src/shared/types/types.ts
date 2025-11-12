@@ -37,7 +37,7 @@ export interface Payment {
   id: string;
   userId: string;
   amount: number;
-  status: 'pending' | 'success' | 'failed';
+  status: 'pending' | 'success' | 'failed' | 'canceled';
   createdAt: string;
 }
 

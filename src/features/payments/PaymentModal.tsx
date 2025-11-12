@@ -62,6 +62,7 @@ export default function PaymentModal({ onClose }: Props) {
 
       // Слушаем сообщения от платежного окна
       const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
         if (event.data.type === 'PAYMENT_SUCCESS') {
           // Обновляем баланс
           dispatch(fetchProfile());

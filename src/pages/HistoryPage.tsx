@@ -69,6 +69,8 @@ export default function HistoryPage() {
                   <td>
                     {p.status === "success" ? (
                       <span className={s.success}>Успешно</span>
+                    ) : p.status === "canceled" ? (
+                      <span className={s.canceled}>Отменено</span>
                     ) : (
                       <span className={s.pending}>Ожидание</span>
                     )}
