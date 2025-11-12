@@ -1,55 +1,49 @@
-import s from './Layout.module.scss';
+import s from "./Footer.module.scss";
 
-function Footer() {
+export default function Footer() {
   return (
     <footer className={s.footer}>
-      <div className={s.footerInner}>
-        <div className={s.main}>
-          <div className={s.info}>
-            <h2>Coop Project</h2>
-            <p>Это учебное приложение для совместной работы над задачами.
-              Проект реализован на React + TypeScript, с использованием Redux Toolkit и React Router DOM.
-              Для хранения и управления данными используется API на FastAPI.</p>
-            <p>Руководитель проекта: <a href="https://github.com/TheLarhand" target="_blank" rel="noopener noreferrer">Соколов Игорь</a></p>
-          </div>
-
-
-          <p>© 2025 IT-STEP JSE-242</p>
+      <div className={s.container}>
+        <div className={s.left}>
+          <p className={s.age}>18+</p>
+          <p className={s.license}>Лицензия № 123/456 от 01.01.2025</p>
         </div>
-        <div className={s.contacts}>
-          <h4>Контакты команды</h4>
 
-          <ul>
-            <li>
-              <a href="https://github.com/SHR-HR" target="_blank" rel="noopener noreferrer">
-                Шаунин Роман
-              </a>
-            </li>
-            <li>
-              <a href="https://github.com/nurbay-bay" target="_blank" rel="noopener noreferrer">
-                Нурмолдин Нурбай
-              </a>
-            </li>
-            <li>
-              <a href="https://github.com/gazzzpachooo" target="_blank" rel="noopener noreferrer">
-                Лаас Михаил
-              </a>
-            </li>
-            <li>
-              <a href="https://github.com/Tiltushkin" target="_blank" rel="noopener noreferrer">
-                Исаев Владислав
-              </a>
-            </li>
-          </ul>
-          <p>
-            <a href="https://github.com/TheLarhand/Coop_project" target="_blank" rel="noopener noreferrer">
-              Репозиторий проекта
-            </a>
-          </p>
+        <div className={s.right}>
+          <a
+            href="https://github.com/yourname/udoman-client"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={s.githubLink}
+          >
+            Клиент (React)
+          </a>
+          <a
+            href="https://github.com/yourname/udoman-server"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={s.githubLink}
+          >
+            Сервер (Node.js)
+          </a>
         </div>
+      </div>
+
+      <div className={s.bottom}>
+        <p>
+          <a href="/responsible-gaming" className={s.link}>
+            Ответственная игра
+          </a>{" "}
+          •{" "}
+          <a href="/terms" className={s.link}>
+            Условия использования
+          </a>{" "}
+          •{" "}
+          <a href="/privacy" className={s.link}>
+            Политика конфиденциальности
+          </a>
+        </p>
       </div>
     </footer>
   );
 }
-
-export default Footer;
