@@ -3,6 +3,7 @@ export interface User {
   username: string;
   phone: string;
   balance: number;
+  birthDate: string;
 }
 
 export interface AuthResponse {

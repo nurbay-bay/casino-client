@@ -8,7 +8,7 @@ import {
 } from "../../store/slices/authSlice";
 import s from "./ProfileModal.module.scss";
 
-type Step = "main" | "changePassword" | "changePhone" | "verifyPhone";
+type Step = "main" | "settings" | "changePassword" | "changePhone" | "verifyPhone";
 
 export default function ProfileModal({ onClose }: { onClose: () => void }) {
   const dispatch = useAppDispatch();
@@ -22,12 +22,13 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
 
   const handleChangePwd = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMsgPwd("");
     try {
       await dispatch(changePassword({ oldPassword: oldPwd, newPassword: newPwd })).unwrap();
-      setMsgPwd("Пароль изменён");
-      setTimeout(() => setStep("main"), 1500);
+      setMsgPwd("Пароль успешно изменён");
+      setTimeout(() => setStep("settings"), 1500);
     } catch (err: any) {
-      setMsgPwd(err.message || "Ошибка");
+      setMsgPwd(err.message || "Ошибка при смене пароля");
     }
   };
 
@@ -38,24 +39,31 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
 
   const handleRequestPhone = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMsgPhone("");
     try {
       await dispatch(requestPhoneChange(newPhone)).unwrap();
-      setMsgPhone("Код отправлен");
+      setMsgPhone("Код отправлен на новый номер");
       setStep("verifyPhone");
     } catch (err: any) {
-      setMsgPhone(err.message);
+      setMsgPhone(err.message || "Ошибка");
     }
   };
 
   const handleVerifyPhone = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMsgPhone("");
     try {
       await dispatch(verifyPhoneChange(code)).unwrap();
-      setMsgPhone("Телефон обновлён");
-      setTimeout(() => setStep("main"), 1500);
+      setMsgPhone("Телефон успешно обновлён");
+      setTimeout(() => setStep("settings"), 1500);
     } catch (err: any) {
-      setMsgPhone(err.message);
+      setMsgPhone(err.message || "Неверный код");
     }
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    onClose();
   };
 
   if (!user) return null;
@@ -65,22 +73,95 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
       <div className={s.modal} onClick={(e) => e.stopPropagation()}>
         <button className={s.close} onClick={onClose}>×</button>
 
+        {/* === ОСНОВНОЙ ЭКРАН === */}
         {step === "main" && (
-          <>
-            <h2>Профиль</h2>
-            <p><strong>Имя:</strong> {user.username}</p>
-            <p><strong>Телефон:</strong> {user.phone}</p>
-            <p><strong>Баланс:</strong> {user.balance} ₸</p>
+          <div className={s.mainStep}>
+            <h2 className={s.title}>Профиль</h2>
 
-            <button onClick={() => setStep("changePassword")}>Сменить пароль</button>
-            <button onClick={() => setStep("changePhone")}>Сменить телефон</button>
-            <button onClick={() => dispatch(logout())}>Выйти</button>
-          </>
+            <div className={s.userInfo}>
+              <p className={s.username}>{user.username}</p>
+              <p className={s.userId}>ID {user.id || "скрытый"}</p>
+            </div>
+
+            <div className={s.balanceSection}>
+              <div className={s.balanceLabel}>Основной счет</div>
+              <div className={s.balanceAmount}>
+                {user.balance?.toFixed(2) || "0.00"} KZT
+              </div>
+              <div className={s.balanceActions}>
+                <button className={s.depositBtn}>Пополнить</button>
+                <button className={s.withdrawBtn}>Вывести</button>
+              </div>
+            </div>
+
+            <div className={s.menuList}>
+              <button className={s.menuItem} onClick={() => setStep("settings")}>
+                <span className={s.menuIcon}>Settings</span>
+                <span>Настройки</span>
+              </button>
+
+              <button className={s.menuItem}>
+                <span className={s.menuIcon}>History</span>
+                <span>История ставок</span>
+                <span className={s.menuHint}>Открытые и рассчитанные</span>
+              </button>
+
+              <button className={s.menuItem}>
+                <span className={s.menuIcon}>Payments</span>
+                <span>История платежей</span>
+                <span className={s.menuHint}>Статусы депозитов и выводов</span>
+              </button>
+            </div>
+
+            <button className={s.logoutBtn} onClick={handleLogout}>
+              Выйти из аккаунта
+            </button>
+          </div>
         )}
 
+        {/* === НАСТРОЙКИ === */}
+        {step === "settings" && (
+          <div className={s.settingsStep}>
+            <button className={s.backBtn} onClick={() => setStep("main")}>
+              Назад
+            </button>
+            <h2 className={s.title}>Настройки</h2>
+
+            <div className={s.settingsList}>
+              <div className={s.settingItem}>
+                <label>Телефон</label>
+                <div className={s.settingValue}>{user.phone}</div>
+                <button className={s.changeBtn} onClick={() => setStep("changePhone")}>
+                  Изменить
+                </button>
+              </div>
+
+              <div className={s.settingItem}>
+                <label>Пароль</label>
+                <button className={s.changeBtn} onClick={() => setStep("changePassword")}>
+                  Изменить
+                </button>
+                <p className={s.settingHint}>Для изменения нужно ввести текущий пароль</p>
+              </div>
+
+              <div className={s.settingItem}>
+                <label>Дата рождения</label>
+                <div className={s.settingValue}>
+                  {user.birthDate ? new Date(user.birthDate).toLocaleDateString("ru-RU") : "Не указана"}
+                </div>
+                <p className={s.settingHint}>Изменение невозможно</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* === СМЕНА ПАРОЛЯ === */}
         {step === "changePassword" && (
-          <form onSubmit={handleChangePwd}>
-            <h3>Смена пароля</h3>
+          <form onSubmit={handleChangePwd} className={s.form}>
+            <button className={s.backBtn} onClick={() => setStep("settings")}>
+              Назад
+            </button>
+            <h3 className={s.subtitle}>Смена пароля</h3>
             <input
               type="password"
               placeholder="Старый пароль"
@@ -96,15 +177,18 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
               minLength={6}
               required
             />
-            <button type="submit">Сохранить</button>
-            <button type="button" onClick={() => setStep("main")}>Назад</button>
-            {msgPwd && <p className={s.msg}>{msgPwd}</p>}
+            <button type="submit" className={s.submitBtn}>Сохранить</button>
+            {msgPwd && <p className={`${s.msg} ${msgPwd.includes("успешно") ? s.success : s.error}`}>{msgPwd}</p>}
           </form>
         )}
 
+        {/* === СМЕНА ТЕЛЕФОНА — ШАГ 1 === */}
         {step === "changePhone" && (
-          <form onSubmit={handleRequestPhone}>
-            <h3>Смена телефона</h3>
+          <form onSubmit={handleRequestPhone} className={s.form}>
+            <button className={s.backBtn} onClick={() => setStep("settings")}>
+              Назад
+            </button>
+            <h3 className={s.subtitle}>Смена телефона</h3>
             <input
               type="tel"
               placeholder="Новый номер"
@@ -112,26 +196,29 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setNewPhone(e.target.value)}
               required
             />
-            <button type="submit">Отправить код</button>
-            <button type="button" onClick={() => setStep("main")}>Назад</button>
+            <button type="submit" className={s.submitBtn}>Отправить код</button>
             {msgPhone && <p className={s.msg}>{msgPhone}</p>}
           </form>
         )}
 
+        {/* === СМЕНА ТЕЛЕФОНА — ШАГ 2 === */}
         {step === "verifyPhone" && (
-          <form onSubmit={handleVerifyPhone}>
-            <h3>Подтверждение</h3>
-            <p>Код отправлен на {newPhone}</p>
+          <form onSubmit={handleVerifyPhone} className={s.form}>
+            <button className={s.backBtn} onClick={() => setStep("changePhone")}>
+              Назад
+            </button>
+            <h3 className={s.subtitle}>Подтверждение</h3>
+            <p className={s.infoText}>Код отправлен на {newPhone}</p>
             <input
               type="text"
-              placeholder="Код"
+              placeholder="Код из SMS"
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              maxLength={6}
               required
             />
-            <button type="submit">Подтвердить</button>
-            <button type="button" onClick={() => setStep("changePhone")}>Назад</button>
-            {msgPhone && <p className={s.msg}>{msgPhone}</p>}
+            <button type="submit" className={s.submitBtn}>Подтвердить</button>
+            {msgPhone && <p className={`${s.msg} ${msgPhone.includes("успешно") ? s.success : s.error}`}>{msgPhone}</p>}
           </form>
         )}
       </div>
