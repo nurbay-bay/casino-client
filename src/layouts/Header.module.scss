@@ -7,10 +7,20 @@
   color: white;
   font-family: 'Arial', sans-serif;
   height: 80px;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  transform: translateZ(0); /* Для плавности */
 }
 
+.header.scrolled {
+  height: 50px;
+  padding: 8px 20px;
+}
+
+/* === ЛОГО === */
 .logoLink {
   text-decoration: none;
   flex-shrink: 0;
@@ -26,22 +36,45 @@
 .logoImg {
   height: 32px;
   width: 32px;
+  transition: all 0.3s ease;
 }
 
 .iconImg {
   height: 24px;
   width: 24px;
+  transition: all 0.3s ease;
+}
+
+.header.scrolled .logoImg {
+  height: 28px;
+  width: 28px;
+}
+
+.header.scrolled .iconImg {
+  height: 20px;
+  width: 20px;
+}
+
+.logoText {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  transition: all 0.3s ease;
 }
 
 
-// Навигация
+/* === НАВИГАЦИЯ === */
 .nav {
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #3c3c3c;
   border-radius: 8px;
-  
+  transition: all 0.3s ease;
+}
+
+.header.scrolled .nav {
+  padding: 4px;
 }
 
 .navItem {
@@ -58,34 +91,38 @@
 
   &.active,
   &.active:hover {
-    color: rgb(255, 255, 255);
-    background: rgb(65, 125, 255);
+    color: white;
+    background: #417dff;
   }
 
-  &:hover {
+  &:hover:not(.active) {
     background: rgba(255, 255, 255, 0.1);
   }
 }
 
-.navText {
-  @media (max-width: 768px) {
-    display: none;
-  }
+.header.scrolled .navItem {
+  padding: 6px 16px;
+  font-size: 13px;
 }
 
-.logoText {
+.navText {
   @media (max-width: 1024px) {
     display: none;
   }
 }
 
-// Правая часть
+/* === ПРАВАЯ ЧАСТЬ === */
 .rightSection {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  transition: gap 0.3s ease;
+}
+
+.header.scrolled .rightSection {
+  gap: 8px;
 }
 
 .balance {
@@ -95,6 +132,7 @@
   font-size: 16px;
   font-weight: 600;
   line-height: 1.2;
+  transition: font-size 0.3s ease;
 
   .currency {
     color: #aaa;
@@ -106,6 +144,10 @@
   }
 }
 
+.header.scrolled .balance {
+  font-size: 14px;
+}
+
 .depositBtn {
   background: #00d25b;
   color: white;
@@ -115,33 +157,129 @@
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.3s ease;
 
   &:hover {
     background: #00b349;
   }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.header.scrolled .depositBtn {
+  padding: 6px 12px;
+  font-size: 13px;
 }
 
 .profileBtn {
-  background: transparent;
+  background: #3c3c3c;
   border: none;
-  color: white;
-  cursor: pointer;
   padding: 8px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #3c3c3c;
-  border-radius: 8px;
-  transition: 0.2s;
+  transition: all 0.3s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
   }
 }
 
-// Адаптив: скрываем всё, кроме иконок и лого
-@media (max-width: 768px) {
+.header.scrolled .profileBtn {
+  padding: 6px;
+}
 
+/* === МОБИЛЬНЫЙ BOTTOM NAV === */
+.bottomNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1f1f1f;
+  border-top: 1px solid #333;
+  padding: 8px 0;
+  z-index: 1000;
+  justify-content: space-around;
+}
+
+.bottomItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #888;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &.active {
+    color: #417dff;
+  }
+
+  .bottomIcon {
+    height: 24px;
+    width: 24px;
+    filter: grayscale(100%) opacity(0.6);
+  }
+
+  &.active .bottomIcon {
+    filter: none;
+  }
+}
+
+/* === АДАПТИВНОСТЬ === */
+@media (max-width: 768px) {
+  .header {
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .nav,
+  .profileBtn {
+    display: none;
+  }
+
+  .rightSection {
+    gap: 10px;
+  }
+
+  .balance {
+    font-size: 15px;
+  }
+
+  .depositBtn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .bottomNav {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    height: 50px;
+  }
+
+  .logoText {
+    display: none;
+  }
+
+  .depositBtn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .balance {
+    font-size: 13px;
+  }
 }

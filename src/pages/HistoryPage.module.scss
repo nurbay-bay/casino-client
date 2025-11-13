@@ -1,6 +1,9 @@
 .wrapper {
   padding: 0 50px;
   min-height: 100vh;
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 }
 
 .title {
