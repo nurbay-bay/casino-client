@@ -28,7 +28,6 @@ export default function RegisterForm({ onNext, onSwitch }: Props) {
       setMessage(result.payload.message);
       onNext(phone);
     } else {
-      console.log("REGISTER ERROR →", result.error.response)
       setMessage(getErrorMessage(result.error));
     }
   };
