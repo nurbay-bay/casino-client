@@ -167,29 +167,35 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
               {/* ... остальной код настроек без изменений ... */}
               <div className={s.settingsList}>
                 <div className={s.settingItem}>
-                  <label>Телефон</label>
-                  <div className={s.settingValue}>{user.phone}</div>
+                  <div>
+                    <label>Телефон</label>
+                    <div className={s.settingValue}>{user.phone}</div>
+                  </div>
                   <button className={s.changeBtn} onClick={() => setStep("changePhone")}>
                     Изменить
                   </button>
                 </div>
 
                 <div className={s.settingItem}>
-                  <label>Пароль</label>
+                  <div>
+                    <label>Пароль</label>
+                    <p className={s.settingHint}>Для изменения нужно ввести текущий пароль</p>
+                  </div>
                   <button className={s.changeBtn} onClick={() => setStep("changePassword")}>
                     Изменить
                   </button>
-                  <p className={s.settingHint}>Для изменения нужно ввести текущий пароль</p>
                 </div>
 
                 <div className={s.settingItem}>
-                  <label>Дата рождения</label>
-                  <div className={s.settingValue}>
-                    {user.birthDate
-                      ? new Date(user.birthDate).toLocaleDateString("ru-RU")
-                      : "Не указана"}
+                  <div>
+                    <label>Дата рождения</label>
+                    <div className={s.settingValue}>
+                      {user.birthDate
+                        ? new Date(user.birthDate).toLocaleDateString("ru-RU")
+                        : "Не указана"}
+                    </div>
+                    <p className={s.settingHint}>Изменение невозможно</p>
                   </div>
-                  <p className={s.settingHint}>Изменение невозможно</p>
                 </div>
               </div>
             </div>
@@ -274,8 +280,6 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
         <PaymentModal
           onClose={() => {
             closePayment();
-            // Можно добавить обновление баланса
-            // dispatch(fetchProfile());
           }}
         />
       )}
