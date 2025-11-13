@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../shared/hooks/reduxHooks";
 import PaymentModal from "../features/payments/PaymentModal";
@@ -22,13 +22,37 @@ export default function Header() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
+  // Используем number вместо NodeJS.Timeout
+  const intervalRef = useRef<number | null>(null);
+
+  // === Загрузка профиля при старте ===
   useEffect(() => {
     if (localStorage.getItem("token")) {
       dispatch(fetchProfile());
     }
   }, [dispatch]);
 
-  // Обработка скролла
+  // === LIVE-ОБНОВЛЕНИЕ БАЛАНСА каждые 5 сек ===
+  useEffect(() => {
+    if (!localStorage.getItem("token")) return;
+
+    // Первичная загрузка
+    dispatch(fetchProfile());
+
+    // Запускаем интервал
+    intervalRef.current = window.setInterval(() => {
+      dispatch(fetchProfile());
+    }, 5000);
+
+    // Очистка при размонтировании
+    return () => {
+      if (intervalRef.current !== null) {
+        window.clearInterval(intervalRef.current);
+      }
+    };
+  }, [dispatch]);
+
+  // === Обработка скролла (сжатие хедера) ===
   useEffect(() => {
     let lastScrollY = window.scrollY;
 
@@ -92,7 +116,9 @@ export default function Header() {
         <div className={s.rightSection}>
           <div className={s.balance}>
             <span className={s.currency}>KZT</span>
-            <span className={s.amount}>{user?.balance?.toFixed(2) || "0.00"}</span>
+            <span className={s.amount}>
+              {user?.balance !== undefined ? user.balance.toFixed(2) : "0.00"}
+            </span>
           </div>
 
           <button onClick={handlePayClick} className={s.depositBtn}>
@@ -122,7 +148,10 @@ export default function Header() {
           <span>История</span>
         </Link>
 
-        <button onClick={handleUserClick} className={`${s.bottomItem} ${profileOpen ? s.active : ""}`}>
+        <button
+          onClick={handleUserClick}
+          className={`${s.bottomItem} ${profileOpen ? s.active : ""}`}
+        >
           <img src={userIcon} alt="profile" className={s.bottomIcon} />
           <span>Профиль</span>
         </button>

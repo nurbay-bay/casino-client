@@ -153,7 +153,7 @@ export default function HistoryPage() {
                   >
                     <option value="">Все</option>
                     <option value="win">Победа</option>
-                    <option value="loss">Проигрыш</option>
+                    <option value="lose">Проигрыш</option>
                   </select>
                 </div>
               </>
