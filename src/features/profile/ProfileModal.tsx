@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../shared/hooks/reduxHooks";
 import {
   changePassword,
@@ -12,6 +13,7 @@ type Step = "main" | "settings" | "changePassword" | "changePhone" | "verifyPhon
 
 export default function ProfileModal({ onClose }: { onClose: () => void }) {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { user } = useAppSelector((s) => s.auth);
   const [step, setStep] = useState<Step>("main");
 
@@ -64,6 +66,12 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
   const handleLogout = () => {
     dispatch(logout());
     onClose();
+    navigate("/login"); // или "/"
+  };
+
+  const goToHistory = (type: "bets" | "payments") => {
+    onClose(); // закрываем модалку
+    navigate(`/history?tab=${type}`);
   };
 
   if (!user) return null;
@@ -100,13 +108,19 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
                 <span>Настройки</span>
               </button>
 
-              <button className={s.menuItem}>
+              <button
+                className={s.menuItem}
+                onClick={() => goToHistory("bets")}
+              >
                 <span className={s.menuIcon}>History</span>
                 <span>История ставок</span>
                 <span className={s.menuHint}>Открытые и рассчитанные</span>
               </button>
 
-              <button className={s.menuItem}>
+              <button
+                className={s.menuItem}
+                onClick={() => goToHistory("payments")}
+              >
                 <span className={s.menuIcon}>Payments</span>
                 <span>История платежей</span>
                 <span className={s.menuHint}>Статусы депозитов и выводов</span>
@@ -178,7 +192,11 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
               required
             />
             <button type="submit" className={s.submitBtn}>Сохранить</button>
-            {msgPwd && <p className={`${s.msg} ${msgPwd.includes("успешно") ? s.success : s.error}`}>{msgPwd}</p>}
+            {msgPwd && (
+              <p className={`${s.msg} ${msgPwd.includes("успешно") ? s.success : s.error}`}>
+                {msgPwd}
+              </p>
+            )}
           </form>
         )}
 
@@ -218,7 +236,11 @@ export default function ProfileModal({ onClose }: { onClose: () => void }) {
               required
             />
             <button type="submit" className={s.submitBtn}>Подтвердить</button>
-            {msgPhone && <p className={`${s.msg} ${msgPhone.includes("успешно") ? s.success : s.error}`}>{msgPhone}</p>}
+            {msgPhone && (
+              <p className={`${s.msg} ${msgPhone.includes("успешно") ? s.success : s.error}`}>
+                {msgPhone}
+              </p>
+            )}
           </form>
         )}
       </div>

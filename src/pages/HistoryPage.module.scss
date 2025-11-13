@@ -1,6 +1,5 @@
 .wrapper {
-  padding: 20px 16px;
-  background: #f8f9fa;
+  padding: 0 50px;
   min-height: 100vh;
 }
 
@@ -8,7 +7,7 @@
   font-size: 22px;
   font-weight: 600;
   text-align: center;
-  margin: 0 0 24px;
+  margin: 0 0 20px;
   color: #1a1a1a;
 }
 
@@ -17,9 +16,8 @@
   background: white;
   border-radius: 12px;
   padding: 4px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
 }
 
 .tab {
@@ -31,15 +29,95 @@
   background: transparent;
   border: none;
   border-radius: 10px;
-  transition: all 0.2s;
 
   &.active {
     background: #0077ff;
     color: white;
   }
+}
 
-  &:not(.active):hover {
-    background: #f0f4ff;
+/* === ГАРМОШКА === */
+.filterAccordion {
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.filterToggle {
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0077ff;
+
+  .arrow {
+    transition: transform 0.2s;
+    &.open {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.filterPanel {
+  padding: 16px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  flex: 1;
+  min-width: 140px;
+
+  label {
+    display: block;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+}
+
+.filterActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.resetBtn {
+  background: #ff3b30;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* === ДЕСКТОП === */
+.desktop {
+  @media (max-width: 768px) {
+    display: none;
   }
 }
 
@@ -47,7 +125,7 @@
   overflow-x: auto;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .table {
@@ -69,7 +147,6 @@
     font-weight: 600;
     font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
 
   td {
@@ -82,24 +159,71 @@
   }
 }
 
-.empty {
+/* === МОБИЛЬНАЯ ВЕРСИЯ === */
+.mobile {
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #eee;
+}
+
+.cardRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .label {
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+.cardFooter {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #eee;
+  font-size: 13px;
+  color: #888;
+  text-align: right;
+}
+
+.emptyMobile {
+  text-align: center;
   color: #999;
   font-style: italic;
-  padding: 32px !important;
+  padding: 32px;
+  font-size: 15px;
 }
 
-.win {
-  color: #00b050;
-  font-weight: 600;
-}
-
-.loss {
-  color: #ff3b30;
-  font-weight: 600;
-}
-
+/* === Статусы === */
+.win,
 .success {
   color: #00b050;
+  font-weight: 600;
+}
+
+.loss,
+.canceled {
+  color: #ff3b30;
   font-weight: 600;
 }
 
@@ -108,17 +232,13 @@
   font-weight: 600;
 }
 
-.canceled {
-  color: #ff3b30;
-  font-weight: 600;
-}
-
+/* === Пагинация === */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .pageBtn {
@@ -129,7 +249,6 @@
   border-radius: 10px;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s;
 
   &:disabled {
     color: #aaa;
@@ -140,7 +259,6 @@
   &:not(:disabled):hover {
     background: #0077ff;
     color: white;
-    border-color: #0077ff;
   }
 }
 
@@ -152,28 +270,6 @@
 .loading {
   text-align: center;
   color: #666;
-  font-size: 15px;
   padding: 40px;
-}
-
-// Адаптивность
-@media (max-width: 480px) {
-  .wrapper {
-    padding: 16px 12px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .tab {
-    font-size: 14px;
-    padding: 10px 8px;
-  }
-
-  .table th,
-  .table td {
-    padding: 10px 8px;
-    font-size: 13px;
-  }
+  font-size: 15px;
 }

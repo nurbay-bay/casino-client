@@ -1,7 +1,8 @@
+/* ==== ОСНОВНОЙ ОВЕРЛЕЙ ==== */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,16 +10,19 @@
   padding: 16px;
 }
 
+/* ==== МОДАЛКА ==== */
 .modal {
-  background: #1a1a1a;
+  background: #ffffff;
   border-radius: 16px;
   width: 100%;
   max-width: 400px;
-  color: white;
+  color: #1a1a1a;
   position: relative;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
+/* ==== КНОПКА ЗАКРЫТИЯ ==== */
 .close {
   position: absolute;
   top: 16px;
@@ -26,15 +30,17 @@
   background: none;
   border: none;
   font-size: 28px;
-  color: #888;
+  color: #999;
   cursor: pointer;
 }
 
+/* ==== ЗАГОЛОВКИ ==== */
 .title {
   font-size: 20px;
   font-weight: 600;
   text-align: center;
   margin: 0 0 16px;
+  color: #1a1a1a;
 }
 
 .subtitle {
@@ -42,8 +48,10 @@
   font-weight: 600;
   margin: 0 0 16px;
   text-align: center;
+  color: #1a1a1a;
 }
 
+/* ==== БЛОКИ ==== */
 .mainStep,
 .settingsStep,
 .form {
@@ -53,28 +61,34 @@
   gap: 16px;
 }
 
+/* ==== ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ ==== */
 .userInfo {
   text-align: center;
+
   .username {
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 4px;
+    color: #1a1a1a;
   }
+
   .userId {
     font-size: 14px;
-    color: #888;
+    color: #777;
   }
 }
 
+/* ==== БАЛАНС ==== */
 .balanceSection {
-  background: #252525;
+  background: #f8f9ff;
   border-radius: 12px;
-  padding: 12px;
+  padding: 14px;
   text-align: center;
+  border: 1px solid #e0e7ff;
 
   .balanceLabel {
     font-size: 13px;
-    color: #aaa;
+    color: #666;
     margin-bottom: 4px;
   }
 
@@ -82,6 +96,7 @@
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 12px;
+    color: #1a1a1a;
   }
 
   .balanceActions {
@@ -90,6 +105,7 @@
   }
 }
 
+/* ==== КНОПКИ ДЕПОЗИТ / ВЫВОД ==== */
 .depositBtn,
 .withdrawBtn,
 .submitBtn {
@@ -98,21 +114,25 @@
   font-size: 14px;
   font-weight: 600;
   flex: 1;
+  transition: all 0.2s;
 }
 
+/* Пополнить */
 .depositBtn,
 .submitBtn {
-  background: #00d1ff;
-  color: black;
+  background: #0077ff;
+  color: #fff;
   border: none;
 }
 
+/* Вывести */
 .withdrawBtn {
   background: transparent;
-  color: #aaa;
-  border: 1px solid #444;
+  color: #555;
+  border: 1px solid #ccc;
 }
 
+/* ==== МЕНЮ ==== */
 .menuList {
   display: flex;
   flex-direction: column;
@@ -120,48 +140,64 @@
 }
 
 .menuItem {
-  background: #252525;
+  background: #f8f9ff;
   border-radius: 12px;
-  padding: 12px;
+  padding: 14px;
   text-align: left;
   border: none;
-  color: white;
+  color: #1a1a1a;
   display: flex;
   flex-direction: column;
   gap: 4px;
   font-size: 15px;
+  border: 1px solid #e0e7ff;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #eef2ff;
+  }
 
   .menuIcon {
     font-size: 18px;
+    color: #0077ff;
   }
 
   .menuHint {
     font-size: 12px;
-    color: #888;
+    color: #777;
   }
 }
 
+/* ==== КНОПКА ВЫХОДА ==== */
 .logoutBtn {
   background: #ff3b30;
-  color: white;
+  color: #fff;
   border: none;
   padding: 14px;
   border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   margin-top: 8px;
+  transition: background 0.2s;
+
+  &:active {
+    background: #e32d27;
+  }
 }
 
+/* ==== КНОПКА НАЗАД ==== */
 .backBtn {
   background: none;
   border: none;
-  color: #00d1ff;
+  color: #0077ff;
   font-size: 15px;
   align-self: flex-start;
   padding: 0;
   margin-bottom: 8px;
+  cursor: pointer;
 }
 
+/* ==== СПИСОК НАСТРОЕК ==== */
 .settingsList {
   display: flex;
   flex-direction: column;
@@ -175,12 +211,13 @@
 
   label {
     font-size: 13px;
-    color: #aaa;
+    color: #666;
   }
 
   .settingValue {
     font-size: 16px;
     font-weight: 500;
+    color: #1a1a1a;
   }
 
   .settingHint {
@@ -190,41 +227,54 @@
   }
 
   .changeBtn {
-    background: #00d1ff;
-    color: black;
+    background: #0077ff;
+    color: #fff;
     border: none;
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 13px;
     align-self: flex-start;
     margin-top: 8px;
+    transition: background 0.2s;
+
+    &:active {
+      background: #005edc;
+    }
   }
 }
 
+/* ==== ФОРМЫ ==== */
 .form {
   input {
-    background: #252525;
-    border: 1px solid #444;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
     border-radius: 8px;
     padding: 12px;
-    color: white;
+    color: #1a1a1a;
     font-size: 15px;
     width: 100%;
     margin-bottom: 12px;
 
     &::placeholder {
-      color: #888;
+      color: #aaa;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #0077ff;
+      box-shadow: 0 0 0 2px rgba(0, 119, 255, 0.15);
     }
   }
 }
 
 .infoText {
   font-size: 14px;
-  color: #aaa;
+  color: #666;
   text-align: center;
   margin-bottom: 12px;
 }
 
+/* ==== СООБЩЕНИЯ ==== */
 .msg {
   text-align: center;
   font-size: 14px;
@@ -232,9 +282,24 @@
 }
 
 .success {
-  color: #00d1ff;
+  color: #00b050;
 }
 
 .error {
   color: #ff3b30;
+}
+
+/* ==== АДАПТИВНОСТЬ ==== */
+@media (max-width: 480px) {
+  .modal {
+    max-width: 340px;
+  }
+
+  .balanceSection .balanceAmount {
+    font-size: 22px;
+  }
+
+  .menuItem {
+    padding: 12px;
+  }
 }
