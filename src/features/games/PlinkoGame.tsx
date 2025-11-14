@@ -5,9 +5,14 @@ import { playGame } from "../../store/slices/gameSlice";
 import GameResult from "./GameResult";
 import s from "./PlinkoGame.module.scss";
 
+import AuthModal from "../auth/AuthModal";
+import PaymentModal from "../payments/PaymentModal";
+
 export default function PlinkoGame() {
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((s) => s.auth);
   const { loading, lastResult } = useAppSelector((s) => s.game);
+  
   const [bet, setBet] = useState(100);
   const sceneRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Engine | null>(null);
@@ -18,27 +23,46 @@ export default function PlinkoGame() {
   const [multipliers, setMultipliers] = useState<number[]>([5, 2, 1.2, 0.8, 0.5, 0.8, 1.2, 2, 5]);
   const binWidthRef = useRef<number>(0);
 
-  const [ pathServ, setPathServ] = useState<number[]>([])
+  const [pathServ, setPathServ] = useState<number[]>([]);
+
+  const [authOpen, setAuthOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     const engine = Engine.create();
     engine.gravity.y = 0.5;
     engineRef.current = engine;
 
-    const width = 410;
-    const height = 450;
+    const width = 380;
+    const height = 400;
 
     const render = Render.create({
       element: sceneRef.current!,
       engine,
-      options: { width, height, wireframes: false, background: "#121212" },
+      options: { 
+        width, 
+        height, 
+        wireframes: false, 
+        background: "transparent",
+        pixelRatio: 1 // Улучшаем производительность
+      },
     });
 
     // === Стенки ===
     const walls = [
-      Bodies.rectangle(width / 2, height, width, 20, { isStatic: true }),
-      Bodies.rectangle(0, height / 2, 10, height, { isStatic: true }),
-      Bodies.rectangle(width, height / 2, 10, height, { isStatic: true }),
+      Bodies.rectangle(width / 2, height, width, 20, { 
+        isStatic: true,
+        render: { fillStyle: "#2d4059" }
+      }),
+      Bodies.rectangle(0, height / 2, 10, height, { 
+        isStatic: true,
+        render: { fillStyle: "#2d4059" }
+      }),
+      Bodies.rectangle(width, height / 2, 10, height, { 
+        isStatic: true,
+        render: { fillStyle: "#2d4059" }
+      }),
     ];
     World.add(engine.world, walls);
 
@@ -46,19 +70,26 @@ export default function PlinkoGame() {
     const pins = [];
     const rows = 10;
     const pinRadius = 4;
-    const vSpacing = 35;
-    const hSpacing = 43;
+    const vSpacing = 32;
+    const hSpacing = 40;
 
     for (let row = 0; row < rows; row++) {
       const pinsInRow = row + 1;
-      const y = 80 + row * vSpacing;
+      const y = 70 + row * vSpacing;
       const totalWidth = (pinsInRow - 1) * hSpacing;
       const startX = (width - totalWidth) / 2;
 
       for (let col = 0; col < pinsInRow; col++) {
         const x = startX + col * hSpacing;
         pins.push(
-          Bodies.circle(x, y, pinRadius, { isStatic: true, render: { fillStyle: "#666" } })
+          Bodies.circle(x, y, pinRadius, { 
+            isStatic: true, 
+            render: { 
+              fillStyle: "#667eea",
+              strokeStyle: "#fff",
+              lineWidth: 1
+            } 
+          })
         );
       }
     }
@@ -71,7 +102,7 @@ export default function PlinkoGame() {
     for (let i = 0; i <= bins; i++) {
       const wall = Bodies.rectangle(binWidth * i, height - 10, 2, 20, {
         isStatic: true,
-        render: { fillStyle: "#333" },
+        render: { fillStyle: "#1a1a2e" },
       });
       World.add(engine.world, wall);
     }
@@ -84,7 +115,12 @@ export default function PlinkoGame() {
         height - 20,
         binWidth - 4,
         10,
-        { isStatic: true, isSensor: true, label: `zone_${i}` }
+        { 
+          isStatic: true, 
+          isSensor: true, 
+          label: `zone_${i}`,
+          render: { fillStyle: "transparent" }
+        }
       );
       zones.push(zone);
     }
@@ -118,41 +154,56 @@ export default function PlinkoGame() {
 
   const handlePlay = async () => {
     if (ballActive) return;
+
+    // Проверка авторизации
+    if (!user) {
+      setAuthOpen(true);
+      return;
+    }
+
+    // Проверка баланса
+    if (user.balance < bet) {
+      setPayOpen(true);
+      return;
+    }
+
     setBallActive(true);
     setHighlightBin(null);
 
     // 1️⃣ Запрос к серверу
     const res = await dispatch(playGame({ game: "plinko", bet })).unwrap();
 
-    // 2️⃣ Берём реальные множители (если API возвращает массив)
-    // По умолчанию используются статичные множители из состояния
+    // 2️⃣ Берём реальные множители
     if (res.details?.multipliers && Array.isArray(res.details.multipliers)) {
       setMultipliers(res.details.multipliers);
     }
 
     const path: number[] = res.details.path || [];
-    setPathServ(path)
-    console.log("path:", path);
+    setPathServ(path);
 
     // 3️⃣ Создаём шарик
     const engine = engineRef.current!;
-    const width = 410;
-    const ball = Bodies.circle(width / 2, 35, 9, {
+    const width = 380;
+    const ball = Bodies.circle(width / 2, 30, 8, {
       restitution: 0.4,
       friction: 0.01,
       frictionAir: 0.025,
       density: 0.02,
-      render: { fillStyle: "#00ff88" },
+      render: { 
+        fillStyle: "#00ff88",
+        strokeStyle: "#fff",
+        lineWidth: 1
+      },
       label: "ball",
     });
     World.add(engine.world, ball);
 
     // 4️⃣ Анимация по рядам с плавной коррекцией
     let step = 0;
-    const stepY = 35;
+    const stepY = 32;
     let nextY = stepY;
 
-    Events.on(engine, "beforeUpdate", () => {
+    const pathHandler = () => {
       if (ball.position.y > nextY && step < path.length) {
         const direction = path[step];
         const forceX = direction === 1 ? 0.01 : -0.01;
@@ -160,15 +211,20 @@ export default function PlinkoGame() {
         step++;
         nextY += stepY;
       }
-    });
+    };
+
+    Events.on(engine, "beforeUpdate", pathHandler);
 
     // Ждём падения до дна
     await new Promise<void>((resolve) => {
       const check = () => {
-        if (ball.position.y > 430) {
+        if (ball.position.y > 380) {
+          Events.off(engine, "beforeUpdate", pathHandler);
           World.remove(engine.world, ball);
           resolve();
-        } else requestAnimationFrame(check);
+        } else {
+          requestAnimationFrame(check);
+        }
       };
       check();
     });
@@ -178,37 +234,131 @@ export default function PlinkoGame() {
 
   return (
     <div className={s.wrapper}>
-      <h2>🟢 Плинко</h2>
-      <div ref={sceneRef} className={s.canvas}></div>
-
-      {/* Множители под ячейками */}
-      <div className={s.multipliers}>
-        {multipliers.map((m, i) => (
-          <div
-            key={i}
-            className={`${s.mult} ${highlightBin === i ? s.active : ""}`}
-          >
-            x{m}
-          </div>
-        ))}
+      <div className={s.header}>
+        <h2>🟢 Плинко</h2>
+        <button 
+          className={s.helpBtn} 
+          onClick={() => setHelpOpen(true)}
+          aria-label="Показать справку"
+        >
+          ❓
+        </button>
       </div>
 
-      <div className={s.controls}>
-        <input
-          type="number"
-          min={10}
-          value={bet}
-          onChange={(e) => setBet(Number(e.target.value))}
-        />
-        <button onClick={handlePlay} disabled={loading || ballActive}>
-          {loading || ballActive ? "Падает..." : "Играть"}
-        </button>
+      <div className={s.gameContainer}>
+        <div className={s.canvasContainer}>
+          <div ref={sceneRef} className={s.canvas}></div>
+          <div className={s.glowEffect}></div>
+        </div>
+
+        {/* Множители под ячейками */}
+        <div className={s.multipliers}>
+          {multipliers.map((m, i) => (
+            <div
+              key={i}
+              className={`${s.mult} ${highlightBin === i ? s.active : ""}`}
+            >
+              x{m}
+            </div>
+          ))}
+        </div>
+
+        <div className={s.controls}>
+          <div className={s.betControl}>
+            <label>Ставка</label>
+            <div className={s.betInputWrapper}>
+              <button 
+                className={s.betAdjust} 
+                onClick={() => setBet(prev => Math.max(10, prev - 10))}
+                disabled={ballActive}
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min={10}
+                step={10}
+                value={bet}
+                onChange={(e) => setBet(Number(e.target.value))}
+                className={s.betInput}
+                disabled={ballActive}
+              />
+              <button 
+                className={s.betAdjust}
+                onClick={() => setBet(prev => prev + 10)}
+                disabled={ballActive}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <button 
+            className={`${s.playButton} ${ballActive ? s.ballActive : ''}`}
+            onClick={handlePlay} 
+            disabled={loading || ballActive}
+          >
+            <span className={s.buttonContent}>
+              {ballActive ? (
+                <>
+                  <span className={s.spinner}></span>
+                  Падает...
+                </>
+              ) : (
+                "🟢 Играть"
+              )}
+            </span>
+          </button>
+        </div>
       </div>
 
       {lastResult && lastResult.game === "plinko" && (
         <GameResult data={lastResult} />
       )}
-      <p>{pathServ}</p>
+
+      {/* Модалка помощи */}
+      {helpOpen && (
+        <div className={s.modalOverlay} onClick={() => setHelpOpen(false)}>
+          <div className={s.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={s.modalHeader}>
+              <h3>🟢 Правила Плинко</h3>
+              <button 
+                className={s.modalClose} 
+                onClick={() => setHelpOpen(false)}
+                aria-label="Закрыть"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className={s.helpContent}>
+              <div className={s.helpSection}>
+                <h4>Как играть:</h4>
+                <p>Шарик падает через пины в одну из ячеек. Множитель зависит от конечной позиции.</p>
+              </div>
+              
+              <div className={s.helpSection}>
+                <h4>Множители:</h4>
+                <div className={s.multipliersTable}>
+                  {multipliers.map((mult, index) => (
+                    <div key={index} className={s.multRow}>
+                      <span>Ячейка {index + 1}</span>
+                      <span className={s.multValue}>×{mult}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <button className={s.closeBtn} onClick={() => setHelpOpen(false)}>
+              Понятно
+            </button>
+          </div>
+        </div>
+      )}
+
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      {payOpen && <PaymentModal onClose={() => setPayOpen(false)} />}
     </div>
   );
 }
