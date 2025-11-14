@@ -24,29 +24,52 @@ export interface LoginData {
 }
 
 export interface GameHistory {
-  id: string;
+  _id: string;
+  userId: string;
   game: "slots" | "plinko";
   bet: number;
-  result: "win" | "lose" | "partial";
+  multiplier?: number;
+  result: "win" | "lose";
   amountWon: number;
-  details: any;
+  details: {
+    symbols?: string[];
+    multiplier?: number;
+    cell?: number;
+    path?: number[];
+    multipliers?: number[];
+  };
   createdAt: string;
 }
 
 
 export interface Payment {
-  id: string;
+  _id: string;
   userId: string;
   amount: number;
   status: 'pending' | 'success' | 'failed' | 'canceled';
+  invoiceId?: string;
   createdAt: string;
+  expiresAt?: string;
+}
+
+export interface CreatePaymentResponse {
+  id: string;
+  paymentUrl: string;
+  invoiceId: string;
+  status: string;
 }
 
 export interface PlayResponse {
-  game: string;
-  result: string;
+  game: "slots" | "plinko";
+  result: "win" | "lose";
   amountWon: number;
   newBalance: number;
-  details: any;
+  details: {
+    symbols?: string[];
+    multiplier?: number;
+    cell?: number;
+    path?: number[];
+    multipliers?: number[];
+  };
   historyEntry?: GameHistory;
 }

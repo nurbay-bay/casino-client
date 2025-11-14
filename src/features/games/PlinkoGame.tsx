@@ -124,8 +124,11 @@ export default function PlinkoGame() {
     // 1️⃣ Запрос к серверу
     const res = await dispatch(playGame({ game: "plinko", bet })).unwrap();
 
-    // 2️⃣ Берём реальные множители
-    if (res.details?.multipliers) setMultipliers(res.details.multipliers);
+    // 2️⃣ Берём реальные множители (если API возвращает массив)
+    // По умолчанию используются статичные множители из состояния
+    if (res.details?.multipliers && Array.isArray(res.details.multipliers)) {
+      setMultipliers(res.details.multipliers);
+    }
 
     const path: number[] = res.details.path || [];
     setPathServ(path)

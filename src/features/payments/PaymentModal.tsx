@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../shared/hooks/reduxHooks";
 import s from "./PaymentModal.module.scss";
-import { createPayment } from "../../store/slices/paymentSlice";
+import { createPayment, cancelPayment } from "../../store/slices/paymentSlice";
 import { fetchProfile } from "../../store/slices/authSlice";
+import { fetchPaymentHistory } from "../../store/slices/historySlice";
 
 import cardImg from "../../assets/images/payment/card.png"
 import cryptoImg from "../../assets/images/payment/crypto.png"
@@ -14,40 +15,100 @@ interface Props {
 export default function PaymentModal({ onClose }: Props) {
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((s) => s.payments);
+  const { user } = useAppSelector((s) => s.auth);
   const [amount, setAmount] = useState(1000);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "crypto">("card");
   const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
+  const [activePaymentToken, setActivePaymentToken] = useState<string | null>(null);
+  const [initialBalance, setInitialBalance] = useState<number | null>(null);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { payments } = useAppSelector((s) => s.history);
 
-  // Проверка статуса платежа
+  // Извлекаем токен из paymentUrl
+  const extractTokenFromUrl = (url: string): string | null => {
+    try {
+      // Формат: http://localhost:8000/payment/page/TOKEN
+      const match = url.match(/\/payment\/page\/([^/?]+)/);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Polling для проверки статуса платежа
   useEffect(() => {
-    if (!activePaymentId) return;
+    if (activePaymentId && activePaymentToken) {
+      // Проверяем статус платежа каждые 3 секунды
+      pollingIntervalRef.current = setInterval(async () => {
+        // Обновляем историю платежей для проверки статуса
+        await dispatch(fetchPaymentHistory());
+      }, 3000);
 
-    const checkStatus = async () => {
-      try {
-        const response = await fetch(`/api/payments/status/${activePaymentId}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success') {
-            dispatch(fetchProfile());
-            setActivePaymentId(null);
-            onClose();
-          } else if (data.status === 'failed') {
-            setActivePaymentId(null);
-          }
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
         }
-      } catch (error) {
-        console.error('Status check error:', error);
-      }
-    };
+      };
+    }
+  }, [activePaymentId, activePaymentToken, dispatch]);
 
-    const interval = setInterval(checkStatus, 5000);
-    return () => clearInterval(interval);
-  }, [activePaymentId, dispatch, onClose]);
+  // Проверяем статус платежа в истории
+  useEffect(() => {
+    if (activePaymentId && payments.length > 0) {
+      const payment = payments.find((p) => p._id === activePaymentId || (p as any).id === activePaymentId);
+      
+      if (payment) {
+        if (payment.status === 'success') {
+          // Платеж успешен
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          setActivePaymentId(null);
+          setActivePaymentToken(null);
+          setInitialBalance(null);
+          dispatch(fetchProfile());
+          setTimeout(() => {
+            onClose();
+          }, 500);
+        } else if (payment.status === 'canceled') {
+          // Платеж отменен
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          setActivePaymentId(null);
+          setActivePaymentToken(null);
+          setInitialBalance(null);
+        }
+      }
+    }
+  }, [payments, activePaymentId, dispatch, onClose]);
+
+  // Отслеживаем изменение баланса после платежа
+  useEffect(() => {
+    if (activePaymentId && initialBalance !== null && user?.balance !== undefined) {
+      // Если баланс увеличился, значит платеж прошел
+      if (user.balance > initialBalance) {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+          pollingIntervalRef.current = null;
+        }
+        setActivePaymentId(null);
+        setActivePaymentToken(null);
+        setInitialBalance(null);
+        // Небольшая задержка перед закрытием, чтобы пользователь увидел обновление
+        setTimeout(() => {
+          onClose();
+        }, 500);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.balance, activePaymentId, initialBalance]);
+
+  // Проверка статуса платежа через сообщения от окна оплаты
+  // Статус обновляется автоматически через webhook и сообщение PAYMENT_SUCCESS
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +119,19 @@ export default function PaymentModal({ onClose }: Props) {
     }
 
     try {
+      // Сохраняем начальный баланс для проверки изменений
+      const currentBalance = user?.balance || 0;
+      setInitialBalance(currentBalance);
+
       const result = await dispatch(createPayment(amount)).unwrap();
-      setActivePaymentId(result.id);
+      const paymentId = result.id;
+      const paymentToken = extractTokenFromUrl(result.paymentUrl);
+      
+      setActivePaymentId(paymentId);
+      setActivePaymentToken(paymentToken);
+      
+      // Загружаем историю платежей для начальной проверки
+      dispatch(fetchPaymentHistory());
 
       const paymentWindow = window.open(
         result.paymentUrl,
@@ -67,32 +139,74 @@ export default function PaymentModal({ onClose }: Props) {
         'width=600,height=700,scrollbars=no,resizable=no'
       );
 
+      if (!paymentWindow) {
+        alert("Не удалось открыть окно оплаты. Проверьте блокировку всплывающих окон.");
+        setActivePaymentId(null);
+        setActivePaymentToken(null);
+        setInitialBalance(null);
+        return;
+      }
+
+      // Обработчик сообщений от окна оплаты
       const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        if (event.data.type === 'PAYMENT_SUCCESS') {
-          dispatch(fetchProfile());
-          setActivePaymentId(null);
-          paymentWindow?.close();
-          window.removeEventListener('message', handleMessage);
-          onClose();
+        // Проверяем тип сообщения (origin может быть другим для платежной страницы)
+        if (event.data && event.data.type === 'PAYMENT_SUCCESS') {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          dispatch(fetchProfile()).then(() => {
+            setActivePaymentId(null);
+            setActivePaymentToken(null);
+            setInitialBalance(null);
+            paymentWindow?.close();
+            window.removeEventListener('message', handleMessage);
+            onClose();
+          });
         }
       };
 
       window.addEventListener('message', handleMessage);
 
-      const checkWindow = setInterval(() => {
-        if (paymentWindow?.closed) {
+      // Проверка закрытия окна оплаты и изменения баланса
+      let checkCount = 0;
+      const maxChecks = 30; // Проверяем максимум 30 секунд
+      
+      const checkWindow = setInterval(async () => {
+        checkCount++;
+        
+        if (paymentWindow.closed) {
           clearInterval(checkWindow);
           window.removeEventListener('message', handleMessage);
-          if (activePaymentId) {
-            setTimeout(() => dispatch(fetchProfile()), 1000);
-          }
+          
+          // Обновляем баланс при закрытии окна
+          // useEffect автоматически проверит изменение баланса
+          dispatch(fetchProfile());
+          
+          // Если баланс не изменится за 3 секунды, просто очищаем
+          setTimeout(() => {
+            if (activePaymentId) {
+              if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+                pollingIntervalRef.current = null;
+              }
+              setActivePaymentId(null);
+              setActivePaymentToken(null);
+              setInitialBalance(null);
+            }
+          }, 3000);
+        } else if (checkCount >= maxChecks) {
+          // Если окно не закрылось за 30 секунд, прекращаем проверку
+          clearInterval(checkWindow);
         }
       }, 1000);
 
     } catch (error: any) {
       console.error('Payment creation error:', error);
       alert(error.message || "Ошибка создания платежа");
+      setActivePaymentId(null);
+      setActivePaymentToken(null);
+      setInitialBalance(null);
     }
   };
 
@@ -129,12 +243,35 @@ export default function PaymentModal({ onClose }: Props) {
         {activePaymentId && (
           <div className={s.paymentStatus}>
             <p>⏳ Ожидаем завершения платежа...</p>
+            <p className={s.statusHint}>После завершения платежа окно закроется автоматически</p>
             <button
               type="button"
-              onClick={() => setActivePaymentId(null)}
+              onClick={async () => {
+                // Отменяем платеж на сервере, если есть токен
+                if (activePaymentToken) {
+                  try {
+                    await dispatch(cancelPayment(activePaymentToken)).unwrap();
+                    // Обновляем историю после отмены
+                    await dispatch(fetchPaymentHistory());
+                  } catch (error) {
+                    console.error('Ошибка отмены платежа:', error);
+                  }
+                }
+                
+                // Останавливаем polling
+                if (pollingIntervalRef.current) {
+                  clearInterval(pollingIntervalRef.current);
+                  pollingIntervalRef.current = null;
+                }
+                
+                setActivePaymentId(null);
+                setActivePaymentToken(null);
+                setInitialBalance(null);
+                dispatch(fetchProfile()); // Обновляем баланс на всякий случай
+              }}
               className={s.cancelBtn}
             >
-              Отменить проверку
+              Отменить платеж
             </button>
           </div>
         )}

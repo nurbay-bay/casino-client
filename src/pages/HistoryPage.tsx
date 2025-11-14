@@ -10,7 +10,7 @@ interface Filters {
   dateFrom: string;
   dateTo: string;
   game?: string;
-  result?: "win" | "loss";
+  result?: "win" | "lose";
   status?: "success" | "pending" | "canceled";
 }
 
@@ -43,6 +43,13 @@ export default function HistoryPage() {
   useEffect(() => {
     dispatch(fetchGameHistory());
     dispatch(fetchPaymentHistory());
+    
+    // Обновляем историю платежей каждые 10 секунд для отслеживания изменений статусов
+    const interval = setInterval(() => {
+      dispatch(fetchPaymentHistory());
+    }, 10000);
+    
+    return () => clearInterval(interval);
   }, [dispatch]);
 
   // Фильтрация данных
@@ -213,7 +220,7 @@ export default function HistoryPage() {
                 <tbody>
                   {paginatedData.length > 0 ? (
                     paginatedData.map((item: any) => (
-                      <tr key={item.id}>
+                      <tr key={item._id || item.id}>
                         {activeTab === "bets" ? (
                           <>
                             <td>{item.game}</td>
@@ -280,7 +287,7 @@ export default function HistoryPage() {
         ) : paginatedData.length > 0 ? (
           <div className={s.cards}>
             {paginatedData.map((item: any) => (
-              <div key={item.id} className={s.card}>
+              <div key={item._id || item.id} className={s.card}>
                 {activeTab === "bets" ? (
                   <>
                     <div className={s.cardRow}>
