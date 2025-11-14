@@ -4,6 +4,7 @@ import GamePage from "./pages/GamePage";
 import MainLayout from "./layouts/MainLayout";
 import HistoryPage from "./pages/HistoryPage";
 import CasinoPage from "./pages/CasinoPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 function App() {
@@ -13,7 +14,14 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/casino" element={<CasinoPage />} />
         <Route path="/game/:id" element={<GamePage />} />
-        <Route path="/history" element={<HistoryPage />} />
+        <Route 
+          path="/history" 
+          element={
+            <ProtectedRoute>
+              <HistoryPage />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </MainLayout>

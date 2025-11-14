@@ -72,6 +72,12 @@
     color: #333;
   }
 
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
   input {
     padding: 0.75rem;
     border: 1px solid #ddd;
@@ -91,8 +97,25 @@
     }
 
     &:invalid {
-      border-color: #dc3545;
+      border-color: #fa5a6a;
     }
+
+    &.error {
+      border-color: #fa5a6a;
+      background-color: #fff5f5;
+
+      &:focus {
+        border-color: #fa5a6a;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.1);
+      }
+    }
+  }
+
+  .fieldError {
+    font-size: 0.75rem;
+    color: #fa5a6a;
+    margin-top: -0.25rem;
+    padding-left: 0.25rem;
   }
 
   button[type="submit"] {
@@ -154,6 +177,38 @@
       background-color: #d1edff;
       color: #004085;
       border: 1px solid #b3d7ff;
+    }
+  }
+
+  .resendSection {
+    margin-top: 0.75rem;
+    text-align: center;
+  }
+
+  .timer {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0;
+  }
+
+  .resendBtn {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 0.875rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+
+    &:hover:not(:disabled) {
+      color: #0056b3;
+    }
+
+    &:disabled {
+      color: #999;
+      cursor: not-allowed;
+      text-decoration: none;
     }
   }
 

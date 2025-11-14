@@ -32,6 +32,15 @@ export const cancelPayment = createAsyncThunk(
   }
 );
 
+// Получить статус платежа по ID
+export const getPaymentStatus = createAsyncThunk(
+  "payments/status",
+  async (paymentId: string) => {
+    const res = await api.get<{ id: string; status: string; amount: number }>(`/payments/status/${paymentId}`);
+    return res.data;
+  }
+);
+
 const paymentSlice = createSlice({
   name: "payments",
   initialState,
