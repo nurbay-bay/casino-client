@@ -23,7 +23,6 @@ export default function PlinkoGame() {
   const [multipliers, setMultipliers] = useState<number[]>([5, 2, 1.2, 0.8, 0.5, 0.8, 1.2, 2, 5]);
   const binWidthRef = useRef<number>(0);
 
-  const [pathServ, setPathServ] = useState<number[]>([]);
 
   const [authOpen, setAuthOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -179,7 +178,6 @@ export default function PlinkoGame() {
     }
 
     const path: number[] = res.details.path || [];
-    setPathServ(path);
 
     // 3️⃣ Создаём шарик
     const engine = engineRef.current!;
