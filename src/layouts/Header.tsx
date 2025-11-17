@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../shared/hooks/reduxHooks";
 import PaymentModal from "../features/payments/PaymentModal";
 import { fetchProfile } from "../store/slices/authSlice";
@@ -16,6 +16,7 @@ import historyIcon from "../assets/images/history.svg";
 export default function Header() {
   const dispatch = useAppDispatch();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAppSelector((s) => s.auth);
   const [authOpen, setAuthOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
@@ -24,6 +25,16 @@ export default function Header() {
 
   // Используем number вместо NodeJS.Timeout
   const intervalRef = useRef<number | null>(null);
+
+  // Открываем модалку входа, если в URL есть параметр auth=login
+  useEffect(() => {
+    if (searchParams.get("auth") === "login" && !authOpen) {
+      setAuthOpen(true);
+      // Убираем параметр из URL после открытия модалки
+      searchParams.delete("auth");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, authOpen, setSearchParams]);
 
   // === Загрузка профиля при старте ===
   useEffect(() => {

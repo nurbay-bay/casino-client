@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
-import { fetchProfile } from "./authSlice";
+import type { CreatePaymentResponse } from "../../shared/types/types";
 
 
 interface PaymentState {
@@ -17,10 +17,26 @@ const initialState: PaymentState = {
 
 export const createPayment = createAsyncThunk(
   "payments/create",
-  async (amount: number, { dispatch }) => {
-    const res = await api.post("/payments/create", { amount });
-    // имитация успешного платежа через несколько секунд
-    setTimeout(() => dispatch(fetchProfile()), 2000);
+  async (amount: number) => {
+    const res = await api.post<CreatePaymentResponse>("/payments/create", { amount });
+    return res.data;
+  }
+);
+
+// Отменить платеж по токену (извлекается из paymentUrl)
+export const cancelPayment = createAsyncThunk(
+  "payments/cancel",
+  async (token: string) => {
+    const res = await api.post(`/payments/cancel/${token}`);
+    return res.data;
+  }
+);
+
+// Получить статус платежа по ID
+export const getPaymentStatus = createAsyncThunk(
+  "payments/status",
+  async (paymentId: string) => {
+    const res = await api.get<{ id: string; status: string; amount: number }>(`/payments/status/${paymentId}`);
     return res.data;
   }
 );

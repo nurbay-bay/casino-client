@@ -12,8 +12,8 @@ export default function CasinoPage() {
       <div className={s.games}>
         <Link to="/game/slots" className={s.card}><img src={slotsImg} alt="slots" className={s.gamesImg}/></Link>
         <Link to="/game/plinko" className={s.card}><img src={plinkoImg} alt="plinko" className={s.gamesImg}/></Link>
-        <div className={s.card}><img src={fortuneImg} alt="fortune" className={s.gamesImg}/></div>
-        <div className={s.card}><img src={blackjackImg} alt="blackjack" className={s.gamesImg}/></div>
+        <button className={s.card} disabled><img src={fortuneImg} alt="fortune" className={s.gamesImg}/></button>
+        <button className={s.card} disabled><img src={blackjackImg} alt="blackjack" className={s.gamesImg}/></button>
       </div>
     </div>
   );
